@@ -1,6 +1,6 @@
 ---
 name: research-flow
-description: "知识调研全流程：搜索资料 → 整理有深度、图文并茂的 Markdown 调研文档 → 按主题存储到 study-notes 仓库（可含本地图片）→ 检查引用关系 → 更新 index 索引 → git 推送远程 GitHub。每次需要深度调研一个新主题、写调研文档时使用。"
+description: "知识调研全流程：搜索资料（web_search 优先用 searxng，图片优先用检索到资料的原图）→ 用中文整理有深度、图文并茂的 Markdown 调研文档 → 按主题存储到 study-notes 仓库（可含本地图片）→ 检查引用关系 → 更新 index 索引 → git 推送远程 GitHub。每次需要深度调研一个新主题、写调研文档时使用。"
 ---
 
 # Research Flow — 深度调研与主题文档同步流程
@@ -14,6 +14,9 @@ description: "知识调研全流程：搜索资料 → 整理有深度、图文�
 - Git token 存在 `/home/admin/.openclaw/workspaces/brucex/secrets.json`（字段：`github.token` / `github.username` / `github.repo` / `github.repo_url`）
 - **不依赖 llm-wiki-cn skill**，也不需要 Obsidian Wikilink 规范 —— 使用标准 Markdown 即可
 - 图片可以本地保存后在 md 中引用（`![](images/xxx.png)`），实现图文并茂
+- **语言**：所有**对话回复**一律用**中文**；**调研文档正文也统一用中文撰写**（专有名词/代码/原文引用可保留英文）。
+- **搜索**：`web_search` **优先使用 searxng**（本地隐私元搜索实例，无 API key、无限量）；仅在 searxng 搜不到/质量差时才退回其他途径。
+- **插图**：文档配图**优先取用检索到的资料中的原图**（论文/官网/博客的架构图、流程图、截图）；**只有找不到合适原图时才自绘 SVG/生成示意图**。
 
 ## 仓库目录结构（按主题组织）
 
@@ -55,21 +58,33 @@ grep -rl "关键词" . --include="*.md"   # 检索是否已有相关内容
 
 ### 第 2 步：资料收集
 
-1. 用 **web_search / web_fetch**（或 headless-browser 抓 JS 页面）搜集一手与二手资料：论文摘要、官方文档、博客、社区讨论等。
-2. 提取核心观点、数据、图表，标注来源。
-3. 如有可用的图片（架构图、流程图、截图、示意图），保存到该主题的 `images/` 目录。可手绘 SVG/用工具生成示意图补充。
+1. **搜索优先用 searxng**：`web_search` **优先使用 searxng**（本地隐私元搜索实例 `http://localhost:8080`，聚合 Google/Bing/DDG 等，无 API key、无限量），例如：
+
+   ```bash
+   cd ~/.openclaw/workspace/skills/searxng
+   python3 scripts/searxng.py search "查询词" -n 10 -l zh   # 网页搜索（中文结果）
+   python3 scripts/searxng.py search "查询词" -l en        # 英文结果
+   python3 scripts/searxng.py search "查询词" -c images -n 10  # 图片搜索
+   ```
+
+   当 searxng 搜索不到/结果质量差，或需要特定页面内容时，再退用 **web_fetch / web_search（其他 provider）** 或 headless-browser 抓 JS 页面。
+
+2. 用 **web_fetch** 抓取命中页内容（论文摘要、官方文档、博客、社区讨论等），提取核心观点、数据、图表，标注来源。
+3. **图片优先用检索到的资料原图**：
+   - 优先保存**检索资料中自带的原图**（论文/官网/博客中的架构图、流程图、架构示意、截图），下载到该主题的 `images/` 目录后在 md 中以相对路径引用，尽量保证原图、无水印、清晰。
+   - **仅当找不到合适的原图时**，才手绘 SVG 或用工具自行生成示意图补充（自绘时力求准确反映原资料表达的结构）。
 4. 保存原始链接/来源到文档的「参考资料」小节。
 
 ### 第 3 步：撰写调研文档（有深度 + 图文并茂）
 
-每篇文档遵循仓库既有风格：`# 标题` 起头，紧跟 `> **关键词**: ...` 引用块，正文使用标准 Markdown（相对链接、表格、代码块、图片），内容用中文。参考已有笔记（如 `Agent-SDK/`、`Embedding-Models/` 下的文档）保持风格一致。
+每篇文档遵循仓库既有风格：`# 标题` 起头，紧跟 `> **关键词**: ...` 引用块，正文使用标准 Markdown（相对链接、表格、代码块、图片），**内容一律用中文撰写**（专有名词、代码、英文原文引用可保留），参考已有笔记（如 `Agent-SDK/`、`Embedding-Models/` 下的文档）保持风格一致。
 
 - **结构建议**：背景/为什么要研究 → 核心概念拆解 → 深入分析（原理、机制、数据）→ 对比/权衡 → 实战经验/踩坑 → 总结 → 参考资料。
 - **深度要求**：
   - 不只搬运，要有自己的综合判断、因果分析、独到观察（如已有多篇是「~数千 tokens」的深度笔记）。
   - 关键数据、指标、机制要写清楚来源。
   - 涉及易混淆概念时用对比表格。
-- **图文并茂**：正文中合理插入图片，辅助理解：
+- **图文并茂**：正文中合理插入图片（**优先用检索资料原图**；无原图再自绘），辅助理解：
   ```markdown
   ![架构图说明](images/architecture.png)
   ```
@@ -132,6 +147,8 @@ git pull origin master --no-rebase --allow-unrelated-histories
 
 ## 注意事项
 
+- **检索优先用 searxng** 做 web_search；图片**优先取检索资料原图**，无原图才自绘；
+- **所有中文**：会话回复与文档正文都用中文，专有名词/代码/原文引用例外。
 - **写前必查仓库现状**，处理好与既有文档的引用关系。
 - 图片用相对路径 `images/xxx` 引用，随仓库一起提交，保证跨设备可显示。
 - 每次写完都要更新 `INDEX.md`；新主题同步登记到 `README.md`。
