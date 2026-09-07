@@ -6,8 +6,8 @@
 
 | 目录 | 说明 |
 |------|------|
-| [research-flow](./research-flow/) | 知识调研全流程 skill（OpenClaw / searxng 版）：深度、图文并茂的 md 调研文档，按主题存储到 study-notes，更新 INDEX 并推送 GitHub |
-| [research-flow-general](./research-flow-general/) | 同上流程的**通用版**：适配 Cursor / Claude Code / Codex，不依赖 OpenClaw / searxng；与 `research-flow` 并存 |
+| [research-flow](./research-flow/) | 知识调研全流程 skill（**OpenClaw / searxng 版，保持原样**）：深度、图文并茂的 md 调研文档，按主题存储到 study-notes，更新 INDEX 并推送 GitHub |
+| [research-flow-general](./research-flow-general/) | 同上流程的**通用版**（Cursor / Claude Code / Codex）：不依赖 OpenClaw / searxng；与 `research-flow` **并存、不覆盖** |
 | ... | （更多 skill 陆续沉淀中） |
 
 ## 结构约定
